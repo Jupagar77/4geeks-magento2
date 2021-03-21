@@ -8,10 +8,10 @@ namespace Bananacode\FourGeeks\Gateway\Request;
 
 use Magento\Payment\Gateway\ConfigInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Payment\Gateway\Helper\SubjectReader;
 use Magento\Payment\Gateway\Request\BuilderInterface;
-use Magento\Sales\Api\Data\OrderPaymentInterface;
 use Magento\Payment\Helper\Formatter;
-use Magento\Braintree\Gateway\SubjectReader;
+use Magento\Sales\Api\Data\OrderPaymentInterface;
 
 /**
  * Class CaptureRequest
@@ -46,8 +46,7 @@ class CaptureRequest implements BuilderInterface
         ConfigInterface $config,
         SubjectReader $subjectReader,
         \Magento\Framework\Encryption\EncryptorInterface $encryptor
-    )
-    {
+    ) {
         $this->config = $config;
         $this->subjectReader = $subjectReader;
         $this->_encryptor = $encryptor;
@@ -84,14 +83,14 @@ class CaptureRequest implements BuilderInterface
         $nonce = str_split($this->config->getValue(
             $sandbox ? 'sandbox_client_id' : 'client_id',
             $order->getStoreId()
-        ),3);
+        ), 3);
 
         return [
             'currency' => $order->getCurrencyCode(),
             'amount' => $this->formatPrice($this->subjectReader->readAmount($buildSubject)),
             'payment_method_nonce' => $payment->getAdditionalInformation('payment_method_nonce'),
-            'entity_description' => 'Orden #' . $order->getOrderIncrementId(),
-            'description' => 'Orden #' . $order->getOrderIncrementId(),
+            'entity_description' => substr($this->config->getValue('transaction_description'), 0, 10) . ' #' . $order->getOrderIncrementId(),
+            'description' => $this->config->getValue('transaction_description') . ' #' . $order->getOrderIncrementId(),
             'nonce' => $nonce[0] . $nonce[1] . $nonce[2],
             'client_id' => $this->config->getValue(
                 $sandbox ? 'sandbox_client_id' : 'client_id',

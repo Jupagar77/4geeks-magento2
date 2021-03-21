@@ -61,6 +61,9 @@
                     <label>Credit Card Types</label>
                     <source_model>Magento\Payment\Model\Source\Cctype</source_model>
                 </field>
+                <field id="transaction_description" translate="label" type="text" sortOrder="180" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Transaction Description</label>
+                </field>
             </group>
         </section>
     </system>

@@ -1,0 +1,11 @@
+<mapping xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/error_mapping.xsd">
+    <message_list>
+        <message code="01" translate="true">La tarjeta fue declinada por el banco emisor. </message>
+        <message code="02" translate="true">El año de expiración de la tarjeta no es válido.</message>
+        <message code="03" translate="true">El mes de expiración de la tarjeta no es válido.</message>
+        <message code="04" translate="true">El código de seguridad de la tarjeta no es válido.</message>
+        <message code="05" translate="true">El código de seguridad de la tarjeta no es válido.</message>
+        <message code="06" translate="true">El código de seguridad de la tarjeta no es válido.</message>
+        <message code="07" translate="true">La tarjeta ha expirado, contacta a tu banco emisor.</message>
+    </message_list>
+</mapping>

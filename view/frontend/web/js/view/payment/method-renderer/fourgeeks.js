@@ -13,8 +13,7 @@ define(
         'Magento_Ui/js/model/messageList',
         'Magento_Payment/js/model/credit-card-validation/credit-card-number-validator',
         'Magento_Payment/js/model/credit-card-validation/expiration-date-validator',
-        'mage/translate',
-        'jsencrypt',
+        'mage/translate'
     ],
     function ($, Component, CryptoJS, quote, globalMessageList, creditCardNumberValidator, expirationDateValidator) {
         'use strict';

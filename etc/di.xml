@@ -151,4 +151,22 @@
             <argument name="config" xsi:type="object">FourGeeksConfig</argument>
         </arguments>
     </type>
+
+    <!-- Error Mapping-->
+    <virtualType name="Bananacode\FourGeeks\Gateway\ErrorMapper\VirtualConfigReader" type="Magento\Payment\Gateway\ErrorMapper\VirtualConfigReader">
+        <arguments>
+            <argument name="fileName" xsi:type="string">fourgeeks_error_mapping.xml</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Bananacode\FourGeeks\Gateway\ErrorMapper\VirtualMappingData" type="Magento\Payment\Gateway\ErrorMapper\MappingData">
+        <arguments>
+            <argument name="reader" xsi:type="object">Bananacode\FourGeeks\Gateway\ErrorMapper\VirtualConfigReader</argument>
+            <argument name="cacheId" xsi:type="string">fourgeeks_error_mapper</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Bananacode\FourGeeks\Gateway\ErrorMapper\VirtualErrorMessageMapper" type="Magento\Payment\Gateway\ErrorMapper\ErrorMessageMapper">
+        <arguments>
+            <argument name="messageMapping" xsi:type="object">Bananacode\FourGeeks\Gateway\ErrorMapper\VirtualMappingData</argument>
+        </arguments>
+    </virtualType>
 </config>

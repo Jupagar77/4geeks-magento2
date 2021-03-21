@@ -46,23 +46,46 @@ class ClientMock implements ClientInterface
     private $_bananaCryptor;
 
     /**
+     * @var \Bananacode\Base\Helper\Notify
+     */
+    protected $_bananaNotify;
+
+    /**
+     * @var \Magento\Directory\Block\Currency
+     */
+    private $_currency;
+
+    /**
+     * @var \Bananacode\Base\Helper\CurrencyExchange
+     */
+    private $_currencyExchange;
+
+    /**
      * ClientMock constructor.
      * @param Logger $logger
      * @param \Magento\Framework\HTTP\Client\Curl $curl
      * @param \Magento\Store\Model\StoreManagerInterface $storeManager
      * @param \Bananacode\FourGeeks\Helper\Encryption $bananaCryptor
+     * @param \Bananacode\Base\Helper\Notify $bananaNotify
+     * @param \Magento\Directory\Block\Currency $currency
+     * @param \Bananacode\Base\Helper\CurrencyExchange $currencyExchange
      */
     public function __construct(
         Logger $logger,
         \Magento\Framework\HTTP\Client\Curl $curl,
         \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Bananacode\FourGeeks\Helper\Encryption $bananaCryptor
-    )
-    {
+        \Bananacode\FourGeeks\Helper\Encryption $bananaCryptor,
+        \Bananacode\Base\Helper\Notify $bananaNotify,
+        \Magento\Directory\Block\Currency $currency,
+        \Bananacode\Base\Helper\CurrencyExchange $currencyExchange
+    ) {
         $this->logger = $logger;
         $this->_curl = $curl;
         $this->_storeManager = $storeManager;
         $this->_bananaCryptor = $bananaCryptor;
+        $this->_bananaNotify = $bananaNotify;
+        $this->_currency = $currency;
+        $this->_currencyExchange = $currencyExchange;
     }
 
     /**
@@ -81,6 +104,13 @@ class ClientMock implements ClientInterface
             $response = $this->placeOrder($requestData, $authorize);
         }
 
+        if (is_array($response)) {
+            if (array_key_exists('error', $response)) {
+                $this->_bananaNotify
+                    ->discord('sales', 'Intento fallido de pago por un monto de ' . $requestData['amount'] . ' colones | https://gph.is/1lmtBdO', 'ERROR de Pago');
+            }
+        }
+
         return $response;
     }
 
@@ -97,7 +127,7 @@ class ClientMock implements ClientInterface
         ];
 
         $this->_curl->post(self::FOUR_GEEKS_URL . 'authentication/token/', json_encode($parameters));
-        if($response  = $this->_curl->getBody()){
+        if ($response  = $this->_curl->getBody()) {
             $response = (array)json_decode($response);
             if (is_array($response)) {
                 if (isset($response['access_token']) & isset($response['token_type'])) {
@@ -128,9 +158,16 @@ class ClientMock implements ClientInterface
             "Authorization" => $authorize['token_type'] . " " . $authorize['access_token']
         ];
 
+        $currentCurrencyCode = $this->_currency->getCurrentCurrencyCode();
+        if ($currentCurrencyCode != $parameters['currency']) {
+            $venta = $this->_currencyExchange->colonToDollarCompra();
+            $parameters['currency'] = $currentCurrencyCode;
+            $parameters['amount'] = $parameters['amount']/$venta;
+        }
+
         $this->_curl->setHeaders($headers);
         $this->_curl->post(self::FOUR_GEEKS_URL . 'v1/charges/simple/create/', json_encode($parameters));
-        if($response = $this->_curl->getBody()) {
+        if ($response = $this->_curl->getBody()) {
             $response = (array)json_decode($response);
             $this->logger->debug($response);
         }

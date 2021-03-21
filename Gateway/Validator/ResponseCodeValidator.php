@@ -18,6 +18,16 @@ class ResponseCodeValidator extends AbstractValidator
 {
     const RESULT_CODE = 'charge_id';
 
+    const ERROR_MESSAGES = array(
+        "Your card was declined. Please review it with your Bank." => "01",
+        "Card's expiration year is not valid." => "02",
+        "Card's expiration month is not valid." => "03",
+        "Card's security code is not incorrect." => "04",
+        "Card's security code is not correct." => "05",
+        "Card's security code is not valid." => "06",
+        "Your card has expired. Please review it with your Bank." => "07",
+    );
+
     /**
      * Performs validation of result code
      *
@@ -37,11 +47,14 @@ class ResponseCodeValidator extends AbstractValidator
                 []
             );
         } else {
-            $error = $this->extractError($response);
+            $errors = $this->extractErrorObject($response);
             return $this->createResult(
                 false,
                 [
-                    $error
+                    $errors[1]
+                ],
+                [
+                    $errors[0]
                 ]
             );
         }
@@ -60,14 +73,27 @@ class ResponseCodeValidator extends AbstractValidator
      * @param array $response
      * @return \Magento\Framework\Phrase|mixed
      */
-    private function extractError(array $response)
+    private function extractErrorObject(array $response)
     {
         if (isset($response['error'])) {
             $response['error'] = (array)$response['error'];
-            if (isset($response['error']['es'])) {
-                return $response['error']['es'];
+            if (isset($response['error']['en'])) {
+                if(isset(self::ERROR_MESSAGES[$response['error']['en']])) {
+                    return [
+                        self::ERROR_MESSAGES[$response['error']['en']],
+                        $response['error']['en']
+                    ];
+                } else {
+                    return [
+                        '01',
+                        'Your card was declined. Please review it with your Bank.'
+                    ];
+                }
             }
         }
-        return __('Transaction has been declined. Please try again later.');
+        return [
+            '01',
+            'Your card was declined. Please review it with your Bank.'
+        ];
     }
 }
